@@ -8,11 +8,13 @@
 #include <vector>
 
 // New examples developed for the First International School of Hadron Femtography
+// Not official or endorsed by the PARTONS collaboration
 // Herve Dutrieux - September 19, 2024
+
 void extract_xdep_GPD(double xi, double t, double mu2, double min_x = 1e-4, int nbre_x = 100) ;
 std::map<int, double> GPDModel(double const& x, double const&) ;
 void using_GPDEvolution_high_perf(double mu2F, double mu2I, double min_x = 1e-4, int nbre_x = 100) ;
-
+void CFFNeuralNetwork();
 
 // XML Parser
 std::vector<std::string> parseArguments(int argc, char** argv) {

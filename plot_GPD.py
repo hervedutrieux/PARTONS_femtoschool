@@ -1,3 +1,4 @@
+# Herve Dutrieux - September 19, 2024
 # Code to handle the dataset extracted from the terminal output and plot the GPDs
 
 import matplotlib.pyplot as plt

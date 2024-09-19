@@ -20,6 +20,7 @@
 #include <partons/modules/active_flavors_thresholds/ActiveFlavorsThresholdsQuarkMasses.h>
 #include <partons/modules/convol_coeff_function/ConvolCoeffFunctionModule.h>
 #include <partons/modules/convol_coeff_function/DVCS/DVCSCFFStandard.h>
+#include <partons/modules/convol_coeff_function/DVCS/DVCSCFFNN.h>
 #include <partons/modules/convol_coeff_function/DVMP/DVMPCFFGK06.h>
 #include <partons/modules/evolution/gpd/GPDEvolutionApfel.h>
 #include <partons/modules/gpd/GPDGK16Numerical.h>
@@ -48,6 +49,9 @@
 #include <partons/modules/collinear_distribution/CollinearDistributionLHAPDF.h>
 #include <partons/services/CollinearDistributionService.h>
 
+// New examples developed for the First International School of Hadron Femtography
+// Not official or endorsed by the PARTONS collaboration
+// Herve Dutrieux - September 19, 2024
 
 void extract_xdep_GPD(double xi, double t, double mu2, double min_x = 1e-4, int nbre_x = 100) {
     // Outputs the tabulated values of the GPD on a logarithmic grid in x at a given (xi, t, mu2)
@@ -92,6 +96,10 @@ void extract_xdep_GPD(double xi, double t, double mu2, double min_x = 1e-4, int 
             pGPDModel, 0);
     pGPDModel = 0;
 }
+
+
+
+
 
 
 std::map<int, double> GPDModel(double const& x, double const&)
@@ -162,6 +170,11 @@ std::map<int, double> GPDModel(double const& x, double const&)
   return QCDEvMap;
 }
 
+
+
+
+
+
 void using_GPDEvolution_high_perf(double mu2F, double mu2I, double min_x = 1e-4, int nbre_x = 100) {
     // Outputs the x dependence of a GPD model at a higher scale on a logarithmic grid in x
     const double xi = 1e-2;
@@ -200,4 +213,61 @@ void using_GPDEvolution_high_perf(double mu2F, double mu2I, double min_x = 1e-4,
 
     PARTONS::Partons::getInstance()->getLoggerManager()->info("main", __func__, grid_x);
     PARTONS::Partons::getInstance()->getLoggerManager()->info("main", __func__, Hu);
+}
+
+
+
+
+
+
+void CFFNeuralNetwork() {
+
+    // Retrieve service
+    PARTONS::DVCSConvolCoeffFunctionService* pDVCSConvolCoeffFunctionService =
+            PARTONS::Partons::getInstance()->getServiceObjectRegistry()->getDVCSConvolCoeffFunctionService();
+
+    // Create CFF module with the BaseModuleFactory
+    PARTONS::DVCSConvolCoeffFunctionModule* pDVCSCFFModule =
+            PARTONS::Partons::getInstance()->getModuleObjectFactory()->newDVCSConvolCoeffFunctionModule(
+                    PARTONS::DVCSCFFNN::classId);
+
+    std::string res = "[";
+    for(int i = 1; i < 101; i++){
+        // Select the replica no. i
+        ElemUtils::Parameters parameters(
+                PARTONS::DVCSCFFNN::PARAMETER_NAME_REPLICA, i);
+        pDVCSCFFModule->configure(parameters);
+
+        // Create the list of kinematics
+        PARTONS::List<PARTONS::DVCSConvolCoeffFunctionKinematic> cffKinematicList;
+        int nbre_xi = 20;
+        double min_xi = 1e-3;
+        for (int  j = 0; j < nbre_xi; j++){
+                // Logarithmic grid in x with 20 points from 1e-3 to 1
+                cffKinematicList.add( PARTONS::DVCSConvolCoeffFunctionKinematic
+                        (exp(-log(min_xi) / (nbre_xi - 1) * j + log(min_xi)), -0.3, 2., 2., 2.) );
+        }
+        // Run computation
+        PARTONS::List<PARTONS::DVCSConvolCoeffFunctionResult> cffResult =
+                pDVCSConvolCoeffFunctionService->computeManyKinematic(
+                        cffKinematicList, pDVCSCFFModule);
+
+        res += "[";
+        for (int  j = 0; j < nbre_xi; j++){
+                res += "(" + std::to_string(cffResult[j].getKinematic().getXi().getValue()) + ", " +
+                    std::to_string(cffResult[j].getResult(PARTONS::GPDType::H).imag())  + "), ";
+        }
+        res += "], ";
+    }
+    res += "]";
+
+    // Print results for DVCSCFFModule
+    PARTONS::Partons::getInstance()->getLoggerManager()->info("main", __func__,
+            res);
+
+    // Remove pointer references
+    // Module pointers are managed by PARTONS
+    PARTONS::Partons::getInstance()->getModuleObjectFactory()->updateModulePointerReference(
+            pDVCSCFFModule, 0);
+    pDVCSCFFModule = 0;
 }
