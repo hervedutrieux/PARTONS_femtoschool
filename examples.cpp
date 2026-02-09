@@ -92,9 +92,9 @@ void extract_xdep_GPD(double xi, double t, double mu2, double min_x = 1e-4, int 
     PARTONS::List<PARTONS::GPDKinematic> gpdKinematicList;
     int nbre_x(2), nbre_t(2), nbre_Q2(2);
     for(int k=0; k < nbre_t; k++){
-        double t( 8 * k*k / (nbre_t-1) / (nbre_t-1) );
+        double t( -8 * k*k / (nbre_t-1) / (nbre_t-1) );
     for(int j=0; j < nbre_Q2; j++){
-        double q2( pow(2, 1+0.416666667*j) );
+        double q2( pow(2, 1+5*j/(nbre_Q2-1)) );
     for(int i=0; i < nbre_x; i++){
         double xi (exp(-log(0.0001) / (nbre_x-1) * i + log(0.0001)) );
         gpdKinematicList.add( PARTONS::GPDKinematic(xi, xi, t, q2, q2) );
@@ -109,7 +109,7 @@ void extract_xdep_GPD(double xi, double t, double mu2, double min_x = 1e-4, int 
     std::string Hu = "[", kins = "[";
     for(int i=0; i < nbre_x*nbre_t*nbre_Q2; i++){
         Hu += std::to_string( gpdResultList[i].getPartonDistribution(PARTONS::GPDType::H).getQuarkDistribution(PARTONS::QuarkFlavor::UP).getQuarkDistributionPlus() )+",";
-        kins += "["+std::to_string(gpdKinematicList[i].getX().getValue())+","+std::tostring(gpdKinematicList[i].getT().getValue())+","+std::tostring(gpdKinematicList[i].getMuF2().getValue())+"],";
+        kins += "["+std::to_string(gpdKinematicList[i].getX().getValue())+","+std::to_string(gpdKinematicList[i].getT().getValue())+","+std::to_string(gpdKinematicList[i].getMuF2().getValue())+"],";
     }
 
     PARTONS::Partons::getInstance()->getLoggerManager()->info("main", __func__, kins);
