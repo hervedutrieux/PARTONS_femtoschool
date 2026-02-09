@@ -106,13 +106,11 @@ void extract_xdep_GPD(double xi, double t, double mu2, double min_x = 1e-4, int 
             pGPDService->computeManyKinematic(gpdKinematicList, pGPDModel);
 
     // Print results
-    std::string Hu = "[", kins = "[";
+    std::string Hu = "[";
     for(int i=0; i < nbre_x*nbre_t*nbre_Q2; i++){
-        Hu += std::to_string( gpdResultList[i].getPartonDistribution(PARTONS::GPDType::H).getQuarkDistribution(PARTONS::QuarkFlavor::UP).getQuarkDistributionPlus() )+",";
-        kins += "["+std::to_string(gpdKinematicList[i].getX().getValue())+","+std::to_string(gpdKinematicList[i].getT().getValue())+","+std::to_string(gpdKinematicList[i].getMuF2().getValue())+"],";
+        Hu += "["+std::to_string( gpdResultList[i].getPartonDistribution(PARTONS::GPDType::H).getQuarkDistribution(PARTONS::QuarkFlavor::UP).getQuarkDistributionPlus() )+","+"["+std::to_string(gpdKinematicList[i].getX().getValue())+","+std::to_string(gpdKinematicList[i].getT().getValue())+","+std::to_string(gpdKinematicList[i].getMuF2().getValue())+"],";
     }
 
-    PARTONS::Partons::getInstance()->getLoggerManager()->info("main", __func__, kins);
     PARTONS::Partons::getInstance()->getLoggerManager()->info("main", __func__, Hu);
     */
 
